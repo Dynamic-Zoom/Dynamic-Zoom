@@ -8,21 +8,24 @@ def run_model(model, inputBuffer: FrameBuffer, outputBuffers: List[FrameBuffer])
 
     received_frame = None
     processed_frame = None
+    unprocessed_buffers = outputBuffers
 
     while (not inputBuffer.input_exhausted) or (not inputBuffer.isEmpty()) or (processed_frame != None) or (received_frame != None):
         
         # If processed, write to output buffer
         if processed_frame != None:
-            anyFull = False
-            for outputBuffer in outputBuffers:
+            unfinished_output_buffers = []
+            for outputBuffer in unprocessed_buffers:
                 if outputBuffer.isFull():
-                    anyFull = True
+                    unfinished_output_buffers.append(outputBuffer)
                 else:
                     outputBuffer.addFrame(processed_frame)
-            if anyFull:
+            if len(unfinished_output_buffers) > 0:
                 time.sleep(WAIT_TIME)
+                unprocessed_buffers = unfinished_output_buffers # retry only unfinished buffers
             else:
                 processed_frame = None
+                unprocessed_buffers = outputBuffers # all completed, process all buffers next time
             continue
 
         # Run model if we can process

@@ -11,13 +11,16 @@ def run_model(model, inputBuffer: FrameBuffer, outputBuffers: List[FrameBuffer])
         
         # If processed, write to output buffer
         if processed_frame != None:
-            allFull = False
-            # for outputBuffer in outputBuffers:
-            #     if outputBuffer.isFull():
-            #         time.sleep(WAIT_TIME)
-            #     else:
-            #         outputBuffer.addFrame(processed_frame)
-            #         processed_frame = None
+            anyFull = False
+            for outputBuffer in outputBuffers:
+                if outputBuffer.isFull():
+                    anyFull = True
+                else:
+                    outputBuffer.addFrame(processed_frame)
+            if anyFull:
+                time.sleep(WAIT_TIME)
+            else:
+                processed_frame = None
             continue
 
         # Run model if we can process

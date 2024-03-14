@@ -67,22 +67,21 @@ class FlexibleFrameBuffer(FrameBuffer):
     '''
     Flexible buffers for CPU <-> CPU transfers only
     '''
-    def __init__(self, soft_limit = -1):
+    def __init__(self, soft_limit = -1, show_warnings = True):
         self.buffer = deque()
         self.input_exhausted = False # Flag to mark no new input frames
         self.soft_limit = soft_limit
+        self.show_warnings = show_warnings
 
     def addFrame(self, frame):
         self.buffer.append(frame)
+        if self.show_warnings and self.isFull():
+            print('WARN: FlexibleFrameBuffer exceeding limit')
 
     def getFrame(self):
-        if self.add_idx == self.get_idx and not self.full:
-            return None  # Buffer is empty, no frame to retrieve
-
-        frame = self.buffer[self.get_idx]
-        self.get_idx = (self.get_idx + 1) % self.buffer_size
-        self.full = False  # Reset the full flag as we've just consumed a frame
-        return frame
+        if self.isEmpty():
+            return None
+        return self.buffer.popleft()
 
     def isFull(self):
         if self.soft_limit >= 0:

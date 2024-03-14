@@ -1,7 +1,20 @@
 import time
+import cv2
+
+WAIT_TIME = 0.01 # in secs
 
 def write_to_file(params, inputBuffer: FrameBuffer):
-    # filename, fps, frame_shape = params
-    # _codec = cv2.VideoWriter_fourcc(*'mp4v')
-    # output_video = cv2.VideoWriter(out_video_path, _codec, fps, frame_shape)
-    pass
+    filename, fps, frame_shape = params
+    _codec = cv2.VideoWriter_fourcc(*'mp4v')
+    output_video = cv2.VideoWriter(filename, _codec, fps, frame_shape)
+
+    while (not inputBuffer.input_exhausted) or (not inputBuffer.isEmpty()):
+        if inputBuffer.isEmpty():
+            time.sleep(WAIT_TIME)
+            continue
+        else:
+            output_video.write(inputBuffer.getFrame())
+
+    # Release resources
+    output_video.release()
+

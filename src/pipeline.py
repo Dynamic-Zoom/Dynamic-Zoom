@@ -1,10 +1,12 @@
 
 from threading import Thread, Lock
-# from 
-from FileWriter import write_to_file
-from FrameBuffer import FixedFrameBuffer, FlexibleFrameBuffer
-from InputStream import mockfn as inS
-from OutputStream import mockfn as outS
+
+from models.BicubicPlusPlus import BicubicPlusPlus
+
+from src.FrameBuffer import FixedFrameBuffer, FlexibleFrameBuffer
+from src.FileWriter import write_to_file
+from src.InputStream import mockfn as inS
+from src.OutputStream import mockfn as outS
 
 
 def run_pipeline():
@@ -17,8 +19,8 @@ def run_pipeline():
 
     
     '''
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = BicubicPlusPlus().to(device)
-    model.load_state_dict(torch.load('bicubic_pp_x3.pth'))
-    model.eval()
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # model = BicubicPlusPlus().to(device)
+    # model.load_state_dict(torch.load('bicubic_pp_x3.pth'))
+    # model.eval()
     pass

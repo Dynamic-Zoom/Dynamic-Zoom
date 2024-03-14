@@ -1,7 +1,9 @@
-import time
-import cv2
 
-WAIT_TIME = 0.01 # in secs
+import cv2
+import time
+from src.FrameBuffer import FrameBuffer
+
+WAIT_TIME = 0.01 # in seconds
 
 def write_to_file(params, inputBuffer: FrameBuffer):
     filename, fps, frame_shape = params

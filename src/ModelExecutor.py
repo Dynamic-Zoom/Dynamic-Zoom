@@ -1,5 +1,7 @@
 import time
 
+from src.FrameBuffer import FrameBuffer
+
 WAIT_TIME = 0.01 # in seconds
 
 def run_model(model, inputBuffer: FrameBuffer, outputBuffers: List[FrameBuffer]):

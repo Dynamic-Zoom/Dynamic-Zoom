@@ -1,22 +1,41 @@
 from collections import deque
 import torch
 
-class FrameBuffer():
-    def addFrame(self): raise Exception('addFrame not implemented')
-    def getFrame(self): raise Exception('getFrame not implemented')
-    def isFull(self): raise Exception('isFull not implemented')
-    def isEmpty(self): raise Exception('isEmpty not implemented')
-    
+
+class FrameBuffer:
+    def addFrame(self):
+        raise Exception("addFrame not implemented")
+
+    def getFrame(self):
+        raise Exception("getFrame not implemented")
+
+    def isFull(self):
+        raise Exception("isFull not implemented")
+
+    def isEmpty(self):
+        raise Exception("isEmpty not implemented")
+
 
 class FixedFrameBuffer(FrameBuffer):
-    def __init__(self, in_device, out_device, tensor_shape, tensor_dtype=torch.float32, buffer_size = 10):
-        
+    def __init__(
+        self,
+        in_device,
+        out_device,
+        tensor_shape,
+        tensor_dtype=torch.float32,
+        buffer_size=10,
+    ):
+
         self.in_device = in_device
         self.out_device = out_device
-        if 'cpu' in [in_device.type, out_device.type]:
+        devices = "{in_device.type};{out_device}"
+        if "cpu" in devices and "cuda" in devices:
             # If cpu <-> gpu transfers are involved, use pinned memory
             self.is_pinned = True
-            self.buffer = [torch.zeros(tensor_shape, dtype=tensor_dtype, pin_memory=True) for _ in range(buffer_size)]
+            self.buffer = [
+                torch.zeros(tensor_shape, dtype=tensor_dtype, pin_memory=True)
+                for _ in range(buffer_size)
+            ]
         else:
             # If no cross device transfers are involved, only maintain simple buffers
             self.is_pinned = False
@@ -29,8 +48,7 @@ class FixedFrameBuffer(FrameBuffer):
         self.tensor_shape = tensor_shape
         self.tensor_dtype = tensor_dtype
 
-        self.input_exhausted = False # Flag to mark no new input frames
-    
+        self.input_exhausted = False  # Flag to mark no new input frames
 
     def addFrame(self, frame):
         if self.full:
@@ -42,7 +60,7 @@ class FixedFrameBuffer(FrameBuffer):
             self.buffer[self.add_idx][:] = frame.to(self.in_device)
 
         self.add_idx = (self.add_idx + 1) % self.buffer_size
-        
+
         if self.add_idx == self.get_idx:
             self.full = True
 
@@ -63,20 +81,22 @@ class FixedFrameBuffer(FrameBuffer):
     def isEmpty(self):
         return self.add_idx == self.get_idx and not self.full
 
+
 class FlexibleFrameBuffer(FrameBuffer):
-    '''
+    """
     Flexible buffers for CPU <-> CPU transfers only
-    '''
-    def __init__(self, soft_limit = -1, show_warnings = True):
+    """
+
+    def __init__(self, soft_limit=-1, show_warnings=True):
         self.buffer = deque()
-        self.input_exhausted = False # Flag to mark no new input frames
+        self.input_exhausted = False  # Flag to mark no new input frames
         self.soft_limit = soft_limit
         self.show_warnings = show_warnings
 
     def addFrame(self, frame):
         self.buffer.append(frame)
         if self.show_warnings and self.isFull():
-            print('WARN: FlexibleFrameBuffer exceeding limit')
+            print("WARN: FlexibleFrameBuffer exceeding limit")
 
     def getFrame(self):
         if self.isEmpty():
@@ -90,4 +110,3 @@ class FlexibleFrameBuffer(FrameBuffer):
 
     def isEmpty(self):
         return len(self.buffer) == 0
-

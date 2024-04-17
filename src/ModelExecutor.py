@@ -2,11 +2,12 @@ from typing import List
 import time
 import torch
 from src.FrameBuffer import FrameBuffer
+from src.utils import get_time
 
-WAIT_TIME = 0.5 # in seconds
+WAIT_TIME = 0.005 # in seconds
 
-def log(s):
-    print('[ModelExecutor]', s)
+def log(*s):
+    print('[ModelExecutor]', get_time(), *s)
     
 def preprocess_frame(frame):
     # Preprocessing for each frame before sending to model
@@ -35,7 +36,8 @@ def run_model(model, inputBuffer: FrameBuffer, outputBuffers: List[FrameBuffer])
                 else:
                     outputBuffer.addFrame(processed_frame)
             if len(unfinished_output_buffers) > 0:
-                time.sleep(WAIT_TIME)
+                log("Buffer is full.. extra wait added")
+                time.sleep(0.05) # should be set something as: next_step_processing_time * next_buffer_size/2
                 unprocessed_buffers = unfinished_output_buffers # retry only unfinished buffers
             else:
                 processed_frame = None
@@ -51,6 +53,7 @@ def run_model(model, inputBuffer: FrameBuffer, outputBuffers: List[FrameBuffer])
                         preprocess_frame(received_frame)
                     )
                 )
+            log("upscaled frame")
             received_frame = None
             continue
         

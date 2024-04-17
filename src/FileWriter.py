@@ -2,11 +2,12 @@ import cv2
 import time
 import numpy as np
 from src.FrameBuffer import FrameBuffer
+from src.utils import get_time
 
-WAIT_TIME = 1  # in seconds
+WAIT_TIME = 0.005  # in seconds
 
-def log(s):
-    print('[FileWriter]', s)
+def log(*s):
+    print('[FileWriter]', get_time(), *s)
 
 def write_to_file(params, inputBuffer: FrameBuffer):
     filename, fps, frame_shape = params
@@ -22,6 +23,7 @@ def write_to_file(params, inputBuffer: FrameBuffer):
             log("writing frame")
             frame = inputBuffer.getFrame().numpy().astype(np.uint8)
             output_video.write(frame)
+            log("written frame")
 
     log("file write complete")
     # Release resources

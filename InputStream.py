@@ -1,7 +1,8 @@
 import cv2
 import time
 import numpy as np
-from src.FrameBuffer import FrameBuffer
+import torch
+from src.FrameBuffer import FrameBuffer, FixedFrameBuffer
 from src.utils import get_time
 
 WAIT_TIME = 0.01 # in seconds
@@ -9,8 +10,8 @@ WAIT_TIME = 0.01 # in seconds
 def log(*s):
     print('[InputStream]', get_time(), *s)
 
-def InputStream(filePath, inputBuffer: FrameBuffer):
-    # Initialize global variables for the cursor position. Should these go into utils.py?   
+def InputStream(filePath, outputBuffer: FixedFrameBuffer):
+    # Initialize global variables for the cursor position. Pass these in from pipeline.py   
     cursor_x, cursor_y = 100, 100  # Starting position
     crop_width, crop_height = 200, 200  # Size of the cropped area
 
@@ -29,7 +30,7 @@ def InputStream(filePath, inputBuffer: FrameBuffer):
 
     # Check if the video capture has been initialized correctly
     if not cap.isOpened():
-        print("Error: Could not open video.")
+        log("Error: Could not open video.")
         exit()
 
     # Get the frame rate of the video
@@ -44,7 +45,7 @@ def InputStream(filePath, inputBuffer: FrameBuffer):
         # Read a new frame
         ret, frame = cap.read()
         if not ret:
-            print("Error: Could not read frame.")
+            log("Error: Could not read frame.")
             break
 
         # Ensure the cropped area does not exceed the frame boundaries
@@ -66,15 +67,20 @@ def InputStream(filePath, inputBuffer: FrameBuffer):
             cv2.imshow('Video Stream', frame_with_rect)
             cv2.imshow('Cropped Area', cropped_frame)
 
+            # Convert cropped_frame to tensor
+            cropped_frame = torch.tensor(cropped_frame, dtype=torch.float32)
+
             # Write cropped frame to frame buffer
             log("writing frame")
-            inputBuffer.addFrame(cropped_frame) # should be inputBuffer.FixedFrameBuffer.addFrame(cropped_frame)?
+            outputBuffer.addFrame(cropped_frame) 
             log("written frame")
 
         # Exit loop when 'q' is pressed
         if cv2.waitKey(delay) & 0xFF == ord('q'):
             break
-
+    
+    outputBuffer.input_exhausted = True
+    
     log("Input Stream complete")
 
     # Release video capture and close windows

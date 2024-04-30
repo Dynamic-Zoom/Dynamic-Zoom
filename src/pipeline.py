@@ -4,20 +4,19 @@ import torch
 import time
 import sys
 import os
-# Add the current working directory to the sys.path
-current_directory = os.getcwd()
-sys.path.append(current_directory)
 from models.BicubicPlusPlus import BicubicPlusPlus
-
 from src.FrameBuffer import FixedFrameBuffer, FlexibleFrameBuffer
 from src.ModelExecutor import run_model
 from src.FrameTransfer import transfer_frames
 from src.FileWriter import write_to_file
-from src.InputStream import InputStream as inS
 from src.OutputStream import mockfn as outS
-
 from src.utils import reset_timer, get_time
-import cv2
+from src.InputStream import VideoProcessor
+
+# add the current directory to the path
+current_directory = os.getcwd()
+sys.path.append(current_directory)
+
 def log(*s):
     print('[Pipeline]', get_time(), *s)
 
@@ -76,7 +75,9 @@ def run_pipeline():
     log('Warmup complete')
     
     # Handle InputStream in the main thread to properly capture mouse events
-    inS("data/input.mp4", modelInBuffer)
+    #inS("data/input.mp4", modelInBuffer)
+    processor = VideoProcessor("data/input.mp4", modelInBuffer)
+    processor.process_frames()
     
     t_model.join()
     t_model_transfer.join()

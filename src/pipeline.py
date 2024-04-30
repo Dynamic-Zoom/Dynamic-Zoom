@@ -2,21 +2,24 @@ from threading import Thread, Lock
 from multiprocessing import Process
 import torch
 import time
-
+import sys
+import os
+# Add the current working directory to the sys.path
+current_directory = os.getcwd()
+sys.path.append(current_directory)
 from models.BicubicPlusPlus import BicubicPlusPlus
 
 from src.FrameBuffer import FixedFrameBuffer, FlexibleFrameBuffer
 from src.ModelExecutor import run_model
 from src.FrameTransfer import transfer_frames
 from src.FileWriter import write_to_file
-from src.InputStream import mockfn as inS
+from src.InputStream import InputStream as inS
 from src.OutputStream import mockfn as outS
 
 from src.utils import reset_timer, get_time
-
+import cv2
 def log(*s):
     print('[Pipeline]', get_time(), *s)
-
 
 def run_pipeline():
     """
@@ -45,7 +48,8 @@ def run_pipeline():
     modelInBuffer = FixedFrameBuffer(cpu, gpu, frame_shape, buffer_size=40)
     modelOutBuffer = FixedFrameBuffer(gpu, cpu, upscaled_frame_shape, buffer_size=5)
     fileWriteBuffer = FlexibleFrameBuffer()
-
+    
+    # Start non-GUI threads
     t_model = Thread(
         target=run_model, args=(model, modelInBuffer, [modelOutBuffer])
     )
@@ -71,30 +75,11 @@ def run_pipeline():
         time.sleep(0.01)
     log('Warmup complete')
     
-    # time.sleep(0.1) # Extra sleep for testing waiting messages
+    # Handle InputStream in the main thread to properly capture mouse events
+    inS("data/input.mp4", modelInBuffer)
     
-    reset_timer()
-    # Testing modelInBuffer + fileOutBuffer
-    t_test = Thread(target=test_thread, args=(frame_shape, cpu, modelInBuffer))
-    t_test.start()
-
     t_model.join()
     t_model_transfer.join()
     t_file.join()
-    t_test.join()
 
     return
-
-def test_thread(frame_shape, cpu, modelInBuffer):
-    
-    for i in range(100):
-        log("Adding frame", i)
-        test_frame = torch.rand(frame_shape, device=cpu) * 255
-        frame_added = modelInBuffer.addFrame(test_frame)
-        while not frame_added:
-            log("Buffer is full.. extra wait added")
-            time.sleep(0.1) # should be set something as: next_step_processing_time * next_buffer_size/2
-            frame_added = modelInBuffer.addFrame(test_frame)
-        log("Added frame", i)
-        time.sleep(0.005)
-    modelInBuffer.input_exhausted = True

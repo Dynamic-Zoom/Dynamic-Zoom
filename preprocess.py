@@ -1,5 +1,10 @@
 import cv2
 import numpy as np
+import sys
+import os
+# Add the current working directory to the sys.path
+current_directory = os.getcwd()
+sys.path.append(current_directory)
 
 # Initialize global variables for the cursor position
 cursor_x, cursor_y = 100, 100  # Starting position
@@ -9,11 +14,15 @@ crop_width, crop_height = 200, 200  # Size of the cropped area
 def update_cursor_position(event, x, y, flags, param):
     global cursor_x, cursor_y
     if event == cv2.EVENT_MOUSEMOVE:
-        cursor_x, cursor_y = x, y
+        # Clamp the cursor position within the window size
+        max_x = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) - 1
+        max_y = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) - 1
+        cursor_x = min(max(x, 0), max_x)
+        cursor_y = min(max(y, 0), max_y)
 
 # Initialize video capture
-# path: "C:\Users\Nicor\OneDrive\Documents\Sem 10\CS 766\project\nico's code\1996 Chicago Bulls 44th Straight Home Win.mp4"
-cap = cv2.VideoCapture("1996 Chicago Bulls 44th Straight Home Win.mp4") # Replace with the path to your video file
+path = r"1996 Chicago Bulls 44th Straight Home Win.mp4"
+cap = cv2.VideoCapture(path)  # Replace with the path to your video file
 
 # Check if the video capture has been initialized correctly
 if not cap.isOpened():
@@ -41,31 +50,18 @@ while True:
     x_end = min(frame.shape[1], cursor_x + crop_width // 2)
     y_end = min(frame.shape[0], cursor_y + crop_height // 2)
 
-    # Crop the frame
-    cropped_frame = frame[y_start:y_end, x_start:x_end]
+    # Crop the frame if valid dimensions exist
+    if (x_end > x_start) and (y_end > y_start):
+        cropped_frame = frame[y_start:y_end, x_start:x_end]
+        # Optionally resize the cropped frame if needed here
+        
+        # Display the original frame with a rectangle showing the crop area
+        frame_with_rect = frame.copy()
+        cv2.rectangle(frame_with_rect, (x_start, y_start), (x_end, y_end), (0, 255, 0), 2)
 
-    # # Display the original frame with a rectangle showing the crop area
-    # frame_with_rect = frame.copy()
-    # cv2.rectangle(frame_with_rect, (x_start, y_start), (x_end, y_end), (0, 255, 0), 2)
-    # cv2.imshow('Video Stream', frame_with_rect)
-
-    # # Optionally display the cropped area in a separate window
-    # cv2.imshow('Cropped Area', cropped_frame)
-    
-     # Resize the cropped frame to match the original frame height, if necessary
-    if cropped_frame.shape[0] != frame.shape[0]:
-        cropped_frame = cv2.resize(cropped_frame, (int(frame.shape[0] * (cropped_frame.shape[1] / cropped_frame.shape[0])), frame.shape[0]))
-
-    # Display the original frame with a rectangle showing the crop area
-    frame_with_rect = frame.copy()
-    cv2.rectangle(frame_with_rect, (x_start, y_start), (x_end, y_end), (0, 255, 0), 2)
-
-    # Concatenate the original frame with the cropped frame
-    combined_frame = np.hstack((frame_with_rect, cropped_frame))
-
-    # Display the combined frame
-    cv2.imshow('Video Stream', combined_frame)
-
+        # Optionally concatenate and display frames
+        cv2.imshow('Video Stream', frame_with_rect)
+        cv2.imshow('Cropped Area', cropped_frame)
 
     # Exit loop when 'q' is pressed
     if cv2.waitKey(delay) & 0xFF == ord('q'):

@@ -3,11 +3,19 @@ import time
 import numpy as np
 import torch
 from src.FrameBuffer import FrameBuffer
-from src.utils import get_time
+from src.utils import get_time, check_verbosity
+
+LOG_PREFIX = "[InputStream]"
 
 
 def log(*s):
-    print("[InputStream]", get_time(), *s)
+    if check_verbosity(1):
+        print(LOG_PREFIX, get_time(), *s)
+
+
+def log2(*s):
+    if check_verbosity(2):
+        print(LOG_PREFIX, get_time(), *s)
 
 
 class VideoProcessor:
@@ -33,7 +41,7 @@ class VideoProcessor:
         if event == cv2.EVENT_MOUSEMOVE:
             self.cursor_x = min(max(x, 0), self.frame_max_x)
             self.cursor_y = min(max(y, 0), self.frame_max_y)
-            log("Mouse event triggered: ", x, y)
+            log2("Mouse event triggered: ", x, y)
 
     def calculate_bounds(self):
         del_x = self.crop_width // 2
@@ -85,7 +93,7 @@ class VideoProcessor:
                 )
                 cv2.imshow("Video Stream", frame_with_rect)
                 cv2.imshow("Cropped Area", cropped_frame)
-
+                cropped_frame = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2RGB)
                 cropped_tensor = torch.tensor(cropped_frame, dtype=torch.float32)
                 self.outputBuffer.addFrame(cropped_tensor)
 

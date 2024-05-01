@@ -3,7 +3,7 @@ import torch
 
 
 class FrameBuffer:
-    
+
     def __len__(self):
         raise Exception("__len__ not implemented")
 
@@ -57,8 +57,10 @@ class FixedFrameBuffer(FrameBuffer):
     def __len__(self):
         length = self.add_idx - self.get_idx
         if length == 0:
-            if self.full: return self.buffer_size
-            else: return 0
+            if self.full:
+                return self.buffer_size
+            else:
+                return 0
         elif length < 0:
             return self.buffer_size + length
         else:
@@ -106,7 +108,7 @@ class FlexibleFrameBuffer(FrameBuffer):
         self.input_exhausted = False  # Flag to mark no new input frames
         self.soft_limit = soft_limit
         self.show_warnings = show_warnings
-    
+
     def __len__(self):
         return len(self.buffer)
 

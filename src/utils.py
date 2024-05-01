@@ -2,6 +2,7 @@ import time
 
 # Timer
 start_time = None
+verbosity = None
 
 
 def reset_timer():
@@ -14,3 +15,13 @@ def get_time():
     if start_time is None:
         reset_timer()
     return time.time() - start_time
+
+
+def set_verbosity(v):
+    global verbosity
+    verbosity = v
+
+
+def check_verbosity(v):
+    global verbosity
+    return verbosity == v

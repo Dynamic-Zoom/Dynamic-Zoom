@@ -91,7 +91,7 @@ def run_pipeline(args):
     )
     t_file = Thread(
         target=write_to_file,
-        args=((args.output, args.fps, upscaled_frame_shape[:2]), fileWriteBuffer),
+        args=((args.output, args.fps, upscaled_frame_shape[1::-1]), fileWriteBuffer),
     )
     t_output_stream = Thread(
         target=run_output_stream,

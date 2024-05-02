@@ -11,9 +11,9 @@ Dive into the advanced super-resolution technology of Dynamic Zoom, a real-time 
 
 - Ensure Conda (Miniconda/Anaconda) is installed on your system. ([Official Conda website for installation guide](https://conda.io/projects/conda/en/latest/user-guide/install/index.html))
 - Run `conda env create -f environment.yml` to install necessary packages.
-- Activate your new Conda environment using `conda activate env-name-here`. (Check for appropriate PyTorch version installation to enable GPU acceleration)
+- Activate your new Conda environment using `conda activate dynamic-zoom`. (Check for appropriate PyTorch version installation to enable GPU acceleration)
 - Run `python run.py --help` to check Command line arguments
-- Example run: `python run.py --input-file "data/input.mp4" --output-file "output/output.mp4"`
+- Example run: `python run.py --input "data/input.mp4" --output "output/output.mp4"`
 
 ## Command line arguments explanation
 

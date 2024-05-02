@@ -1,37 +1,33 @@
-# Dynamic-Zoom
+# Dynamic Zoom - Real-time Video Resolution Enhancement
 
-## Bicubic plus plus - by Aselsan Research group.
+Dive into the advanced super-resolution technology of Dynamic Zoom, a real-time video enhancement system designed for digital media.
 
-This is the 3x super resolution model proposed in 2023 Super-resolution challenge. 
-- Link: https://github.com/aselsan-research-imaging-team/bicubic-plusplus
-- Pretrained model weights is in `weights\bicubic_pp_x3.pth`
+# Links
 
-### TODO items:
-
-- [x] Base file structure
-- [ ] Define conda + virtual environment files for installation
-- [ ] Test FrameBuffer functionality
-- [ ] Test FrameBuffer integration with ModelExecutor and FileWriter
-- [ ] InputStream Implementation (validate corner cases for parallel execution)
-- [ ] OutputStream Implementation (validate corner cases for parallel execution)
-- [ ] Write E2E pipeline
-- [ ] CLI run arguments
-- [ ] Sanity unit tests (Optional)
+- Website: https://dynamic-zoom.github.io/home/
+- Repository: https://github.com/hemanth-nakshatri/Dynamic-Zoom
 
 ## Usage
-- Packages needed:
-    - Pytorch
-    - Scipy
-    - Open-CV
-    - Cudacanvas
-    - Numpy
-    - Tqdm
-    - Pillow
-    - Matplotlib
-    - Scipy
-- Install these packages and it should run with CUDA enabled devices. 
 
-- `Bicubic Plus Plus` gives about `115` FPS for 720p to 4K video super resolution and about `400` FPS for 360p to 1080p super resolution on a GTX 1070.
-- The test bunny video can be found at https://www.peach.themazzone.com/big_buck_bunny_720p_h264.mov. Explore other videos in https://peach.blender.org/download/
+- Ensure Conda (Miniconda/Anaconda) is installed on your system. ([Official Conda website for installation guide](https://conda.io/projects/conda/en/latest/user-guide/install/index.html))
+- Run `conda env create -f environment.yml` to install necessary packages.
+- Activate your new Conda environment using `conda activate env-name-here`. (Check for appropriate PyTorch version installation to enable GPU acceleration)
+- Run `python run.py --help` to check Command line arguments
+- Example run: `python run.py --input-file "data/input.mp4" --output-file "output/output.mp4"`
 
+## Command line arguments explanation
 
+| Argument         | Description                                  | Supported values                                                                     |
+| ---------------- | -------------------------------------------- | ------------------------------------------------------------------------------------ |
+| -h, --help       | Show help message and exit                   |                                                                                      |
+| -r, --roi        | Define size of your ROI window               | 2 (space separated) numbers: `H W`                                                   |
+| --input          | Relative File path of the input file         |                                                                                      |
+| --output         | Relative File path of the output file        |                                                                                      |
+| -m, --model_name | Select upscaling model (default = bicubic++) | `"bicubic++"` <br> `"srgan2x"` <br> `"srgan4x"`                                      |
+| --fps            | Fps of output file (default = 24)            |                                                                                      |
+| -v, --verbosity  | Select output verbosity (default = 0)        | 0 = only pipeline stage logs(default) <br> 1 = per frame logs <br> 2 = detailed logs |
+
+## Supported Models
+
+1. Bicubic++ - by Aselsan Research group: https://github.com/aselsan-research-imaging-team/bicubic-plusplus
+2. Swift-SRGAN - by Koushik Sivarama Krishnan, Karthik Sivarama Krishnan: https://github.com/Koushik0901/Swift-SRGAN

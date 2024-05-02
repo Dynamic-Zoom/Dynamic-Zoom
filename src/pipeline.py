@@ -68,7 +68,7 @@ def run_pipeline(args):
     model.load_state_dict(weights_dict)
     model.eval()
 
-    frame_shape = [180, 240, 3]  # TODO: future - CLI parsing
+    frame_shape = [*args.roi, 3]  # Only RGB channels are supported
     upscaled_frame_shape = (
         frame_shape[0] * upscale_factor,
         frame_shape[1] * upscale_factor,
@@ -82,7 +82,7 @@ def run_pipeline(args):
 
     t_input_stream = Thread(
         target=run_input_stream,
-        args=((args.input_file, frame_shape[0], frame_shape[1]), modelInBuffer),
+        args=((args.input, frame_shape[0], frame_shape[1]), modelInBuffer),
     )
     t_model = Thread(target=run_model, args=(model, modelInBuffer, [modelOutBuffer]))
     t_model_transfer = Thread(
@@ -91,7 +91,7 @@ def run_pipeline(args):
     )
     t_file = Thread(
         target=write_to_file,
-        args=((args.output_file, args.fps, upscaled_frame_shape[:2]), fileWriteBuffer),
+        args=((args.output, args.fps, upscaled_frame_shape[:2]), fileWriteBuffer),
     )
     t_output_stream = Thread(
         target=run_output_stream,

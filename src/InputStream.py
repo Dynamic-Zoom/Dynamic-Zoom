@@ -5,6 +5,7 @@ import torch
 from src.FrameBuffer import FrameBuffer
 from src.utils import get_time, check_verbosity
 
+WINDOW_NAME = "Input Video Stream"
 LOG_PREFIX = "[InputStream]"
 
 
@@ -16,6 +17,29 @@ def log(*s):
 def log2(*s):
     if check_verbosity(2):
         print(LOG_PREFIX, get_time(), *s)
+
+
+def addTextToImg(text: str, img: np.ndarray):
+
+    # Write some Text
+    bottomLeftCornerOfText = (10, img.shape[0] - 12)
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    fontScale = 0.7
+    fontColor = (255, 255, 255)
+    thickness = 2
+    lineType = 2
+
+    cv2.putText(
+        img,
+        text,
+        bottomLeftCornerOfText,
+        font,
+        fontScale,
+        fontColor,
+        thickness,
+        lineType,
+    )
+    return
 
 
 class VideoProcessor:
@@ -34,8 +58,8 @@ class VideoProcessor:
             log("Error: Could not open video.")
             exit()
 
-        cv2.namedWindow("Video Stream")
-        cv2.setMouseCallback("Video Stream", self.update_cursor_position)
+        cv2.namedWindow(WINDOW_NAME)
+        cv2.setMouseCallback(WINDOW_NAME, self.update_cursor_position)
 
     def update_cursor_position(self, event, x, y, flags, param):
         if event == cv2.EVENT_MOUSEMOVE:
@@ -87,15 +111,17 @@ class VideoProcessor:
 
             if x_end > x_start and y_end > y_start:
                 cropped_frame = frame[y_start:y_end, x_start:x_end]
+                cropped_frame = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2RGB)
+                cropped_tensor = torch.tensor(cropped_frame, dtype=torch.float32)
+                self.outputBuffer.addFrame(cropped_tensor)
+
                 frame_with_rect = frame.copy()
                 cv2.rectangle(
                     frame_with_rect, (x_start, y_start), (x_end, y_end), (0, 255, 0), 2
                 )
-                cv2.imshow("Video Stream", frame_with_rect)
-                cv2.imshow("Cropped Area", cropped_frame)
-                cropped_frame = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2RGB)
-                cropped_tensor = torch.tensor(cropped_frame, dtype=torch.float32)
-                self.outputBuffer.addFrame(cropped_tensor)
+                addTextToImg("Press 'q' to exit", frame_with_rect)
+                cv2.imshow(WINDOW_NAME, frame_with_rect)
+                # cv2.imshow("Cropped Area", cropped_frame) # Disabled redundant cropped stream
 
             if cv2.waitKey(delay) & 0xFF == ord("q"):
                 log("User terminated video stream")

@@ -1,0 +1,14 @@
+# Conda environment config
+# You might have to install PyTorch manually based on your device (CPU/GPU) and CUDA version (for NVIDIA GPUs)
+name: dynamic-zoom-env
+channels:
+  - defaults
+dependencies:
+  - python=3.11
+  - pip:
+      - matplotlib
+      - numpy
+      - opencv-python
+      - torch
+      - torchaudio
+      - torchvision

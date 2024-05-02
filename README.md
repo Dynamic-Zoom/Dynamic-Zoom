@@ -5,7 +5,7 @@ Dive into the advanced super-resolution technology of Dynamic Zoom, a real-time 
 # Links
 
 - Website: https://dynamic-zoom.github.io/home/
-- Repository: https://github.com/hemanth-nakshatri/Dynamic-Zoom
+- Repository: https://github.com/Dynamic-Zoom/Dynamic-Zoom
 
 ## Usage
 

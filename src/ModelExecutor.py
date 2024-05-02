@@ -25,6 +25,7 @@ def preprocess_frame(frame):
 
 
 def postprocess_frame(frame):
+    frame = torch.clamp(frame, 0, 255)
     processed_frame = frame.squeeze(0).permute(1, 2, 0)
     return processed_frame
 
@@ -71,8 +72,10 @@ def run_model(model, inputBuffer: FrameBuffer, outputBuffers: List[FrameBuffer])
             log2("upscaling frame")
             with torch.no_grad():
                 processed_frame = postprocess_frame(
+                    # torch.clamp(model(preprocess_frame(received_frame)), 0, 1)
                     model(preprocess_frame(received_frame))
                 )
+                # processed_frame = torch.clamp(processed_frame, 0, 1)
             log("upscaled frame")
             received_frame = None
             continue
